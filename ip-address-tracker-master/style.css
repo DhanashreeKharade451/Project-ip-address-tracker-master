@@ -95,6 +95,7 @@ h1{
 #map { 
     z-index: 0;
     height: 500px;
+    margin: 0;
     border: 5px solid rgb(236, 10, 10);
 }
 

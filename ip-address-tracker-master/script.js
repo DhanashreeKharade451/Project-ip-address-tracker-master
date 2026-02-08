@@ -13,6 +13,7 @@ const ispSpan = document.getElementById("isp");
 
 let initialized = false;
 
+//function to track own IP address on initial page load
 document.addEventListener("DOMContentLoaded", async () => {
   if (initialized) return;
   initialized = true;
@@ -62,23 +63,30 @@ async function fetchData(ipAddress) {
 function renderAPIData(data) {
   ipAddressSpan.textContent = data.ip;
   locationSpan.textContent = `${data.location.city}, ${data.location.region} ${data.location.postalCode}`;
-  
+  console.log("locationSpan.textContent::",locationSpan.textContent)
   timezoneSpan.textContent = `UTC ${data.location.timezone}`;
   ispSpan.textContent = data.isp;
+  showCity(locationSpan.textContent)
 }
 
 // fetch("https://jsonplaceholder.typicode.com/posts/1")
 //   .then(response => response.json())
 //   .then(data => console.log("Fetched data:", data))
 //   .catch(error => console.error("Fetch error:", error));
+const map = L.map('map').setView([20, 0], 2);
 
-let map = L.map("map").setView([51.505, -0.09], 13);
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution:
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-}).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-L.marker([51.5, -0.09])
-  .addTo(map)
-  .bindPopup("A pretty CSS popup.<br> Easily customizable.")
-  .openPopup();
+async function showCity(city) {
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${city}`
+  );
+
+  const data = await res.json();
+
+  const lat = data[0].lat;
+  const lon = data[0].lon;
+
+  map.setView([lat, lon], 10);
+  L.marker([lat, lon]).addTo(map);
+}
